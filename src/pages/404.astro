@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { DEFAULT_LOCALE, getLocaleContent } from '../lib/content';
+
+const content = await getLocaleContent(Astro.currentLocale ?? DEFAULT_LOCALE);
+const { ui, profile } = content;
+---
+
+<BaseLayout
+  content={content}
+  title={`${ui.notFound.title} — ${profile.name}`}
+  description={ui.notFound.text}
+  noindex
+>
+  <section class="not-found">
+    <h1>{ui.notFound.title}</h1>
+    <p>{ui.notFound.text}</p>
+    <p><a href="/">{ui.notFound.back}</a></p>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found {
+    display: grid;
+    gap: 1em;
+    min-height: 50vh;
+    align-content: center;
+    padding: var(--gutter);
+    font-size: var(--fs-index);
+  }
+
+  h1 {
+    font-size: var(--fs-display);
+  }
+</style>

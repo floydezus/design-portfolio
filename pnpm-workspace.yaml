@@ -1,0 +1,5 @@
+packageExtensions:
+  # Upstream omits this dependency, so pnpm resolves an incompatible 2.x beta for @napi-rs/wasm-runtime.
+  '@astrojs/astro2tsx@0.1.3':
+    dependencies:
+      '@emnapi/runtime': 1.11.3

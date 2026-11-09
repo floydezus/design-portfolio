@@ -1,0 +1,56 @@
+---
+import type { LocaleContent } from '../lib/content';
+
+interface Props {
+  content: LocaleContent;
+  isHome: boolean;
+}
+
+const { content, isHome } = Astro.props;
+const { ui, profile } = content;
+const current = (href: string) => (Astro.url.pathname === href ? 'page' : undefined);
+// The name is the page heading only on the home page.
+const NameTag = isHome ? 'h1' : 'p';
+---
+
+<header class="site-header">
+  <NameTag>
+    <a href="/" aria-current={current('/')}>{profile.name}</a>
+    {isHome && <span class="sr-only">{` — ${profile.role.toLowerCase()}, ${profile.location.city}`}</span>}
+  </NameTag>
+  <nav aria-label={ui.a11y.mainNav}>
+    <ul class="nav-list">
+      <li><a href="/cv/" aria-current={current('/cv/')}>{ui.nav.cv}</a></li>
+      <li><a href={`mailto:${profile.contacts.email}`}>{ui.nav.email}</a></li>
+      <li>
+        <a href={`https://t.me/${profile.contacts.telegram}`} rel="me">{ui.nav.telegram}</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25em 1em;
+    padding: var(--header-pad) var(--gutter);
+    background: var(--bg);
+    view-transition-name: site-header;
+    font-size: var(--fs-display);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  .nav-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.25em 0.9em;
+  }
+</style>

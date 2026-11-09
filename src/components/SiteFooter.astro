@@ -1,0 +1,51 @@
+---
+import type { LocaleContent } from '../lib/content';
+
+interface Props {
+  content: LocaleContent;
+  isHome: boolean;
+}
+
+const { content, isHome } = Astro.props;
+const { ui, projects } = content;
+
+const index = projects.map((project) => ({
+  ...project,
+  href: project.href ?? `${isHome ? '' : '/'}#${project.slug}`,
+}));
+---
+
+<footer class="site-footer">
+  <nav aria-label={ui.works.indexLabel}>
+    <ul class="index">
+      {
+        index.map((item) => (
+          <li class:list={{ extra: item.kind === 'extra' }}>
+            <a href={item.href} aria-current={Astro.url.pathname === item.href ? 'page' : undefined}>
+              ({item.marker}){item.title}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</footer>
+
+<style>
+  .site-footer {
+    padding: clamp(3rem, 6vw, 6rem) var(--gutter) var(--gutter);
+  }
+
+  .index {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.5em;
+    font-size: var(--fs-index);
+    line-height: 1.25;
+    letter-spacing: 0.01em;
+  }
+
+  .extra {
+    font-style: italic;
+  }
+</style>

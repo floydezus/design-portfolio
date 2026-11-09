@@ -1,0 +1,227 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getImage, Picture } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { DEFAULT_LOCALE, getLocaleContent } from '../../lib/content';
+
+export const getStaticPaths = (async () => {
+  const { projects } = await getLocaleContent(DEFAULT_LOCALE);
+  return projects.filter((project) => project.gallery).map((project) => ({ params: { slug: project.slug } }));
+}) satisfies GetStaticPaths;
+
+const content = await getLocaleContent(Astro.currentLocale ?? DEFAULT_LOCALE);
+const { ui, profile, projects } = content;
+
+const withPages = projects.filter((project) => project.gallery);
+const position = withPages.findIndex((project) => project.slug === Astro.params.slug);
+const project = withPages[position];
+const gallery = project?.gallery;
+const lead = gallery?.[0];
+const summary = project?.summary;
+if (!project || !gallery || !lead || !summary) {
+  throw new Error(`Project "${Astro.params.slug}" has no page content`);
+}
+const neighbour = (step: number) => withPages[(position + step + withPages.length) % withPages.length];
+const pager = withPages.length > 1 ? { prev: neighbour(-1), next: neighbour(1) } : undefined;
+
+const { Content } = await render(project.entry);
+
+const ratio = (image: (typeof gallery)[number]) => image.src.width / image.src.height;
+const rowSizes = project.galleryRows ?? Array.from({ length: Math.ceil(gallery.length / 3) }, (_, i) =>
+  Math.min(3, gallery.length - i * 3),
+);
+// Each row is laid out at a shared height: an image's width share equals its aspect ratio share.
+const rows = rowSizes.map((size, rowIndex) => {
+  const start = rowSizes.slice(0, rowIndex).reduce((sum, n) => sum + n, 0);
+  const images = gallery.slice(start, start + size);
+  const total = images.reduce((sum, image) => sum + ratio(image), 0);
+  return images.map((image, i) => ({
+    ...image,
+    index: start + i,
+    ratio: ratio(image),
+    sizes: `(max-width: 48rem) 100vw, ${Math.ceil((ratio(image) / total) * 100)}vw`,
+  }));
+});
+const widthsFor = (width: number) => [...[480, 720, 960, 1280, 1600].filter((w) => w < width), width];
+
+// Sharp never upscales, so the 1.91:1 crop is capped by the source size to keep the declared size truthful.
+const ogWidth = Math.min(1200, lead.src.width, Math.floor((lead.src.height * 1200) / 630));
+const ogHeight = Math.round((ogWidth * 630) / 1200);
+const og = await getImage({ src: lead.src, width: ogWidth, height: ogHeight, fit: 'cover', format: 'jpg' });
+const ogImage = { src: og.src, width: ogWidth, height: ogHeight, alt: lead.alt };
+
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: project.title,
+  headline: project.title,
+  description: summary,
+  genre: project.category,
+  dateCreated: String(project.year),
+  url: pageUrl,
+  image: new URL(og.src, Astro.site).href,
+  inLanguage: Astro.currentLocale,
+  creator: { '@type': 'Person', name: profile.name, url: new URL('/', Astro.site).href },
+};
+---
+
+<BaseLayout
+  content={content}
+  title={`${project.title} — ${profile.name}`}
+  description={`${project.title}: ${summary}`}
+  image={ogImage}
+  jsonLd={jsonLd}
+>
+  <article class="project" aria-labelledby="project-title">
+    {
+      pager && (
+        <nav class="pager" aria-label={ui.project.pager}>
+          <a href={pager.prev?.href} rel="prev" aria-label={`${ui.project.prev}: ${pager.prev?.title}`}>
+            ←
+          </a>
+          <a href={pager.next?.href} rel="next" aria-label={`${ui.project.next}: ${pager.next?.title}`}>
+            →
+          </a>
+        </nav>
+      )
+    }
+
+    <div class="intro">
+      <h1 id="project-title">({project.marker}){project.title}:</h1>{' '}
+      {summary}
+    </div>
+
+    <div class="gallery" role="group" aria-label={ui.project.gallery}>
+      {
+        rows.map((row) => (
+          <ul class="row">
+            {row.map((image) => (
+              <li style={{ '--ratio': image.ratio }}>
+                <Picture
+                  src={image.src}
+                  alt={image.alt}
+                  formats={['avif', 'webp']}
+                  widths={widthsFor(image.src.width)}
+                  sizes={image.sizes}
+                  loading={image.index === 0 ? 'eager' : 'lazy'}
+                  fetchpriority={image.index === 0 ? 'high' : 'auto'}
+                  decoding="async"
+                />
+              </li>
+            ))}
+          </ul>
+        ))
+      }
+    </div>
+
+    <div class="details">
+      <dl class="facts">
+        <div>
+          <dt>{ui.project.year}</dt>
+          <dd>{project.year}</dd>
+        </div>
+        {
+          project.facts.map((fact) => (
+            <div>
+              <dt>{fact.label}</dt>
+              <dd>{fact.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <div class="text">
+        <Content />
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .project {
+    display: grid;
+    gap: clamp(2rem, 4vw, 3.5rem);
+    padding: clamp(1rem, 2vw, 2rem) var(--gutter) 0;
+  }
+
+  .pager {
+    display: flex;
+    gap: 1.5em;
+    font-size: var(--fs-display);
+    line-height: 1;
+  }
+
+  .intro {
+    max-width: 30em;
+    font-size: var(--fs-index);
+    line-height: 1.25;
+  }
+
+  .intro h1 {
+    display: inline;
+    font-style: italic;
+  }
+
+  .gallery,
+  .row {
+    display: grid;
+    gap: var(--gutter);
+  }
+
+  .details {
+    display: grid;
+    gap: 2rem var(--gutter);
+  }
+
+  .facts {
+    display: grid;
+    gap: 0.75em;
+    align-content: start;
+  }
+
+  dt {
+    color: var(--text-muted);
+  }
+
+  .text {
+    max-width: 38em;
+  }
+
+  .text :global(h2) {
+    margin-block: 1.6em 0.4em;
+    font-size: var(--fs-index);
+    line-height: 1.2;
+  }
+
+  .text :global(h2:first-child) {
+    margin-block-start: 0;
+  }
+
+  .text :global(p + p) {
+    margin-block-start: 0.75em;
+  }
+
+  @media (min-width: 48rem) {
+    .row {
+      display: flex;
+    }
+
+    .row > li {
+      flex: var(--ratio) 1 0;
+      min-width: 0;
+    }
+
+    .details {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .facts {
+      grid-column: 1 / span 3;
+    }
+
+    .text {
+      grid-column: 4 / span 7;
+    }
+  }
+</style>

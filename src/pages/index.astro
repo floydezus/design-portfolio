@@ -1,0 +1,50 @@
+---
+import WorksGallery from '../components/WorksGallery.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { DEFAULT_LOCALE, getLocaleContent } from '../lib/content';
+
+const content = await getLocaleContent(Astro.currentLocale ?? DEFAULT_LOCALE);
+const { ui, profile } = content;
+
+const siteUrl = new URL('/', Astro.site).href;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl}#website`,
+      url: siteUrl,
+      name: ui.meta.title,
+      inLanguage: Astro.currentLocale,
+      publisher: { '@id': `${siteUrl}#person` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${siteUrl}#person`,
+      name: profile.name,
+      ...(profile.nameLatin && { alternateName: profile.nameLatin }),
+      jobTitle: profile.role,
+      description: profile.intro,
+      url: siteUrl,
+      email: `mailto:${profile.contacts.email}`,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: profile.location.city,
+        addressCountry: profile.location.countryCode,
+      },
+      knowsLanguage: profile.languages.map((language) => language.name),
+      sameAs: [`https://t.me/${profile.contacts.telegram}`],
+    },
+  ],
+};
+---
+
+<BaseLayout
+  content={content}
+  title={ui.meta.title}
+  description={ui.meta.description}
+  isHome
+  jsonLd={jsonLd}
+>
+  <WorksGallery content={content} />
+</BaseLayout>

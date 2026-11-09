@@ -1,0 +1,66 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { DEFAULT_LOCALE, type LocaleContent } from '../lib/content';
+import type { OgImage } from '../lib/seo';
+import '../styles/global.css';
+
+interface Props {
+  content: LocaleContent;
+  title: string;
+  description: string;
+  isHome?: boolean;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown>;
+  image?: OgImage;
+}
+
+const { content, title, description, isHome = false, noindex, jsonLd, image } = Astro.props;
+const { ui } = content;
+---
+
+<!doctype html>
+<html lang={Astro.currentLocale ?? DEFAULT_LOCALE}>
+  <head>
+    <BaseHead
+      title={title}
+      description={description}
+      ogImageAlt={ui.meta.ogImageAlt}
+      noindex={noindex}
+      jsonLd={jsonLd}
+      image={image}
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{ui.a11y.skipLink}</a>
+    <SiteHeader content={content} isHome={isHome} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <SiteFooter content={content} isHome={isHome} />
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    top: 0.5rem;
+    left: var(--gutter);
+    z-index: 100;
+    padding: 0.5rem 0.75rem;
+    background: var(--text);
+    color: var(--bg);
+    font-size: var(--fs-small);
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus-visible {
+    transform: none;
+    color: var(--bg);
+  }
+
+  main:focus {
+    outline: none;
+  }
+</style>
