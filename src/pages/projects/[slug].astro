@@ -2,8 +2,10 @@
 import type { GetStaticPaths } from 'astro';
 import { getImage, Picture } from 'astro:assets';
 import { render } from 'astro:content';
+import Carousel from '../../components/Carousel.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { DEFAULT_LOCALE, getLocaleContent } from '../../lib/content';
+import { placementSizes, placementStyle } from '../../lib/placement';
 
 export const getStaticPaths = (async () => {
   const { projects } = await getLocaleContent(DEFAULT_LOCALE);
@@ -27,21 +29,32 @@ const pager = withPages.length > 1 ? { prev: neighbour(-1), next: neighbour(1) }
 
 const { Content } = await render(project.entry);
 
+// The schema guarantees every image is placed or none is.
+const placed = gallery.flatMap((image, index) =>
+  image.layout && image.mobile ? [{ ...image, index, layout: image.layout, mobile: image.mobile }] : [],
+);
+const isPlaced = placed.length === gallery.length;
+
 const ratio = (image: (typeof gallery)[number]) => image.src.width / image.src.height;
 const rowSizes = project.galleryRows ?? Array.from({ length: Math.ceil(gallery.length / 3) }, (_, i) =>
   Math.min(3, gallery.length - i * 3),
 );
 // Each row is laid out at a shared height: an image's width share equals its aspect ratio share.
-const rows = rowSizes.map((size, rowIndex) => {
+// The row is capped so that its smallest source is never shown above its native height.
+const rows = (isPlaced ? [] : rowSizes).map((size, rowIndex) => {
   const start = rowSizes.slice(0, rowIndex).reduce((sum, n) => sum + n, 0);
   const images = gallery.slice(start, start + size);
   const total = images.reduce((sum, image) => sum + ratio(image), 0);
-  return images.map((image, i) => ({
-    ...image,
-    index: start + i,
-    ratio: ratio(image),
-    sizes: `(max-width: 48rem) 100vw, ${Math.ceil((ratio(image) / total) * 100)}vw`,
-  }));
+  const nativeHeight = Math.min(...images.map((image) => image.src.height));
+  return {
+    maxWidth: `calc(${Math.floor(nativeHeight * total)}px + ${size - 1} * var(--gutter))`,
+    images: images.map((image, i) => ({
+      ...image,
+      index: start + i,
+      ratio: ratio(image),
+      sizes: `(max-width: 48rem) min(100vw, ${image.src.width}px), ${Math.ceil((ratio(image) / total) * 100)}vw`,
+    })),
+  };
 });
 const widthsFor = (width: number) => [...[480, 720, 960, 1280, 1600].filter((w) => w < width), width];
 
@@ -59,7 +72,6 @@ const jsonLd = {
   headline: project.title,
   description: summary,
   genre: project.category,
-  dateCreated: String(project.year),
   url: pageUrl,
   image: new URL(og.src, Astro.site).href,
   inLanguage: Astro.currentLocale,
@@ -95,10 +107,30 @@ const jsonLd = {
 
     <div class="gallery" role="group" aria-label={ui.project.gallery}>
       {
+        isPlaced && (
+          <ul class="placed-grid">
+            {placed.map((image) => (
+              <li class="placed" style={placementStyle(image)}>
+                <Picture
+                  src={image.src}
+                  alt={image.alt}
+                  formats={['avif', 'webp']}
+                  widths={widthsFor(image.src.width)}
+                  sizes={placementSizes(image)}
+                  loading={image.index === 0 ? 'eager' : 'lazy'}
+                  fetchpriority={image.index === 0 ? 'high' : 'auto'}
+                  decoding="async"
+                />
+              </li>
+            ))}
+          </ul>
+        )
+      }
+      {
         rows.map((row) => (
-          <ul class="row">
-            {row.map((image) => (
-              <li style={{ '--ratio': image.ratio }}>
+          <ul class="row" style={{ '--row-max': row.maxWidth }}>
+            {row.images.map((image) => (
+              <li style={{ '--ratio': image.ratio, '--native-width': `${image.src.width}px` }}>
                 <Picture
                   src={image.src}
                   alt={image.alt}
@@ -116,12 +148,14 @@ const jsonLd = {
       }
     </div>
 
+    {
+      project.carousel && (
+        <Carousel images={project.carousel} label={ui.project.carousel} />
+      )
+    }
+
     <div class="details">
       <dl class="facts">
-        <div>
-          <dt>{ui.project.year}</dt>
-          <dd>{project.year}</dd>
-        </div>
         {
           project.facts.map((fact) => (
             <div>
@@ -169,6 +203,16 @@ const jsonLd = {
     gap: var(--gutter);
   }
 
+  .row > li {
+    max-width: var(--native-width);
+  }
+
+  /* Placed images wrap on mobile, so narrow ones sit side by side; spacing matches the rows. */
+  .gallery .placed-grid {
+    flex-flow: row wrap;
+    gap: var(--gutter);
+  }
+
   .details {
     display: grid;
     gap: 2rem var(--gutter);
@@ -205,11 +249,13 @@ const jsonLd = {
   @media (min-width: 48rem) {
     .row {
       display: flex;
+      max-width: var(--row-max);
     }
 
     .row > li {
       flex: var(--ratio) 1 0;
       min-width: 0;
+      max-width: none;
     }
 
     .details {

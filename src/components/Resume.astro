@@ -24,6 +24,7 @@ const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1
       profile.education.map((item) => (
         <div class="entry">
           <p class="lead">{item.url ? <a href={item.url}>{item.institution}</a> : item.institution}</p>
+          {item.degree && <p>{item.degree}</p>}
           <p>{item.place}</p>
         </div>
       ))

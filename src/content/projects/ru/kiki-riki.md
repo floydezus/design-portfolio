@@ -2,7 +2,6 @@
 order: 3
 title: kiki riki
 category: Айдентика
-year: 2025
 summary: >-
   айдентика кофейни со specialty-кофе и арахисовой пастой: логотип, упаковка, этикетки, стаканы,
   витрина и посты для соцсетей.
@@ -15,7 +14,7 @@ mobile: { inset: 14, width: 78 }
 facts:
   - { label: Тип, value: 'Айдентика, упаковка' }
   - { label: Носители, value: 'Коробка, стакан, пакет, банки, витрина, соцсети' }
-galleryRows: [2, 4]
+galleryRows: [2, 1, 4]
 gallery:
   - src: ~/assets/projects/kiki-riki/01-logo.jpg
     alt: >-
@@ -23,6 +22,10 @@ gallery:
       и подпись Specialty coffee & peanut butter на кремовом фоне
   - src: ~/assets/projects/kiki-riki/06-storefront.jpg
     alt: Витрина кафе с белым логотипом kiki riki на стекле под голубо-белой полосатой маркизой
+  - src: ~/assets/projects/kiki-riki/07-bag-jar-cup.jpg
+    alt: >-
+      Крафтовый пакет с логотипом и голубой волной, банка арахисовой пасты Classic Cream
+      и прозрачный стакан айс-латте с белым логотипом kiki riki
   - src: ~/assets/projects/kiki-riki/02-box.jpg
     alt: >-
       Коробка для печенья с арахисом в голубую полоску: открытая с печеньем

@@ -1,6 +1,7 @@
 ---
 import { Picture } from 'astro:assets';
 import type { LocaleContent } from '../lib/content';
+import { placementSizes, placementStyle } from '../lib/placement';
 
 interface Props {
   content: LocaleContent;
@@ -13,40 +14,27 @@ const widths = [400, 600, 800, 1000, 1200, 1600];
 
 <section class="works" aria-labelledby="works-heading">
   <h2 id="works-heading" class="sr-only">{ui.works.heading}</h2>
-  <ul class="grid">
+  <ul class="placed-grid">
     {
       projects.map((project, index) => {
-        const { layout, mobile } = project;
-        const sizes = `(max-width: 48rem) ${mobile.width}vw, ${Math.ceil((layout.colSpan / 12) * 100)}vw`;
         const picture = (
           <Picture
             src={project.cover}
             alt={project.alt}
             formats={['avif', 'webp']}
             widths={widths}
-            sizes={sizes}
+            sizes={placementSizes(project)}
             loading={index < EAGER_COUNT ? 'eager' : 'lazy'}
             fetchpriority={index === 0 ? 'high' : 'auto'}
             decoding="async"
           />
         );
         return (
-          <li
-            id={project.slug}
-            class="item"
-            style={{
-              '--row': layout.row,
-              '--col-start': layout.colStart,
-              '--col-span': layout.colSpan,
-              '--offset': layout.offset,
-              '--m-inset': mobile.inset,
-              '--m-width': mobile.width,
-            }}
-          >
+          <li id={project.slug} class="placed" style={placementStyle(project)}>
             <figure>
               {project.href ? <a href={project.href}>{picture}</a> : picture}
               <figcaption class="sr-only">
-                {project.title}, {project.category.toLowerCase()}, {project.year}
+                {project.title}, {project.category.toLowerCase()}
               </figcaption>
             </figure>
           </li>
@@ -61,32 +49,4 @@ const widths = [400, 600, 800, 1000, 1200, 1600];
     padding: clamp(1.5rem, 3vw, 3rem) var(--gutter) clamp(1rem, 3vw, 3rem);
   }
 
-  .grid {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(2.5rem, 9vw, 4rem);
-  }
-
-  .item {
-    width: calc(var(--m-width) * 1%);
-    margin-inline-start: calc(var(--m-inset) * 1%);
-  }
-
-  @media (min-width: 48rem) {
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      column-gap: var(--gutter);
-      row-gap: clamp(2.5rem, 5vw, 5rem);
-      align-items: start;
-    }
-
-    .item {
-      grid-row: var(--row);
-      grid-column: var(--col-start) / span var(--col-span);
-      width: auto;
-      margin-inline-start: 0;
-      margin-block-start: calc(var(--offset) * clamp(0.5rem, 1.1vw, 1rem));
-    }
-  }
 </style>

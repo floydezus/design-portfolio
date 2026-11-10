@@ -16,7 +16,8 @@ export default defineConfig({
       provider: fontProviders.fontsource(),
       weights: [400, 600],
       styles: ['normal', 'italic'],
-      subsets: ['cyrillic', 'latin'],
+      // latin-ext covers Serbian diacritics (ć, č, š, ž, đ) in project titles.
+      subsets: ['cyrillic', 'latin', 'latin-ext'],
       fallbacks: ['serif'],
     },
   ],

@@ -4,9 +4,9 @@
   --bg: #eaeaea;
   --text: rgb(0 0 0 / 0.85);
   --text-muted: rgb(0 0 0 / 0.6);
-  --link-hover: rgb(0 0 0 / 0.45);
-  --link-active: rgb(0 0 0 / 0.3);
-  --link-current: var(--text-muted);
+  --link-hover: #fff;
+  --link-active: #fff;
+  --link-current: #fff;
 
   --font: var(--font-main), serif;
   --fs-display: clamp(1.625rem, 3vw, 2.75rem);
@@ -109,6 +109,36 @@ nav a[aria-current='page'] {
 ::selection {
   background: var(--text);
   color: var(--bg);
+}
+
+/* Free placement: a stacked column with insets on mobile, a 12-column grid on desktop (vars from lib/placement). */
+.placed-grid {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.5rem, 9vw, 4rem);
+}
+
+.placed {
+  width: calc(var(--m-width) * 1%);
+  margin-inline-start: calc(var(--m-inset) * 1%);
+}
+
+@media (min-width: 48rem) {
+  .placed-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: clamp(2.5rem, 5vw, 5rem);
+    align-items: start;
+  }
+
+  .placed {
+    grid-row: var(--row);
+    grid-column: var(--col-start) / span var(--col-span);
+    width: auto;
+    margin-inline-start: 0;
+    margin-block-start: calc(var(--offset) * clamp(0.5rem, 1.1vw, 1rem));
+  }
 }
 
 .sr-only {

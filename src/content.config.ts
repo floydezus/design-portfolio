@@ -31,7 +31,7 @@ const ui = defineCollection({
       prev: z.string(),
       next: z.string(),
       gallery: z.string(),
-      year: z.string(),
+      carousel: z.string(),
     }),
     cv: z.object({
       title: z.string(),
@@ -89,13 +89,36 @@ const profile = defineCollection({
       )
       .nonempty(),
     education: z
-      .array(z.object({ institution: z.string(), url: z.url().optional(), place: z.string() }))
+      .array(
+        z.object({
+          institution: z.string(),
+          url: z.url().optional(),
+          degree: z.string().optional(),
+          place: z.string(),
+        }),
+      )
       .nonempty(),
     languages: z.array(z.object({ name: z.string(), level: z.string() })).nonempty(),
   }),
 });
 
 const gridColumn = z.number().int().min(1).max(12);
+
+// Free placement on the 12-column grid (desktop) and as an inset strip (mobile).
+const gridLayout = z
+  .object({
+    row: z.number().int().min(1),
+    colStart: gridColumn,
+    colSpan: gridColumn,
+    offset: z.number().min(0).max(12).default(0),
+  })
+  .refine((l) => l.colStart + l.colSpan <= 13, 'layout overflows 12 columns');
+const mobileLayout = z
+  .object({
+    inset: z.number().min(0).max(50),
+    width: z.number().min(40).max(100),
+  })
+  .refine((m) => m.inset + m.width <= 100, 'mobile inset + width exceeds 100%');
 
 // One Markdown file per project in a locale folder: projects/<locale>/<slug>.md.
 // A project gets its own page when it has a gallery; the body is the page text.
@@ -107,34 +130,44 @@ const projects = defineCollection({
         order: z.number().int(),
         title: z.string(),
         category: z.string(),
-        year: z.number().int(),
         // "extra" entries are shown with asterisk markers and in italics, like side sections.
         kind: z.enum(['project', 'extra']).default('project'),
         summary: z.string().optional(),
         cover: image(),
         alt: z.string().min(1),
-        layout: z.object({
-          row: z.number().int().min(1),
-          colStart: gridColumn,
-          colSpan: gridColumn,
-          offset: z.number().min(0).max(12).default(0),
-        }),
-        mobile: z.object({
-          inset: z.number().min(0).max(50),
-          width: z.number().min(40).max(100),
-        }),
+        layout: gridLayout,
+        mobile: mobileLayout,
         facts: z.array(z.object({ label: z.string(), value: z.string() })).default([]),
-        gallery: z.array(z.object({ src: image(), alt: z.string().min(1) })).nonempty().optional(),
+        // Laid out in rows by default; when every image has a layout, it is placed freely on the grid instead.
+        gallery: z
+          .array(
+            z.object({
+              src: image(),
+              alt: z.string().min(1),
+              layout: gridLayout.optional(),
+              mobile: mobileLayout.optional(),
+            }),
+          )
+          .nonempty()
+          .optional(),
         // Images per gallery row; each row is laid out at a shared height. Defaults to rows of three.
         galleryRows: z.array(z.number().int().min(1).max(4)).nonempty().optional(),
+        // Single works shown after the gallery in a horizontal scroll strip.
+        carousel: z.array(z.object({ src: image(), alt: z.string().min(1) })).nonempty().optional(),
       })
-      .refine((p) => p.layout.colStart + p.layout.colSpan <= 13, 'layout overflows 12 columns')
-      .refine((p) => p.mobile.inset + p.mobile.width <= 100, 'mobile inset + width exceeds 100%')
       .refine((p) => !p.gallery || p.summary, 'a project with a gallery needs a summary')
       .refine(
         (p) => !p.galleryRows || p.galleryRows.reduce((sum, n) => sum + n, 0) === p.gallery?.length,
         'galleryRows must add up to the number of gallery images',
-      ),
+      )
+      .refine(
+        (p) => !p.gallery || p.gallery.every((i) => !i.layout === !i.mobile),
+        'a gallery image needs both layout and mobile, or neither',
+      )
+      .refine((p) => {
+        const placed = p.gallery?.filter((i) => i.layout).length ?? 0;
+        return placed === 0 || (placed === p.gallery?.length && !p.galleryRows);
+      }, 'place either every gallery image or none, and drop galleryRows when placing'),
 });
 
 export const collections = { ui, profile, projects };
