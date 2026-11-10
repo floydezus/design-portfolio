@@ -1,5 +1,5 @@
 ---
-order: 1
+order: 6
 title: Beyond Four Walls
 category: Рекламные креативы
 summary: >-
@@ -7,7 +7,7 @@ summary: >-
   чтобы показать: уют — это состояние, а не место.
 cover: ~/assets/projects/beyond-four-walls/cover.png
 alt: Три постера кампании Beyond Four Walls веером — диваны посреди поля, холмов и степи
-layout: { row: 1, colStart: 1, colSpan: 5, offset: 0 }
+layout: { row: 3, colStart: 2, colSpan: 4, offset: 0 }
 mobile: { inset: 10, width: 80 }
 facts:
   - { label: Клиент, value: 'Мебельный бренд' }

@@ -5,12 +5,10 @@ category: Редизайн айдентики
 summary: >-
   редизайн логотипа и базовой айдентики фонда: сохранённая форма буквы B, упрощённая геометрия,
   оранжевый акцент и носители — от флага до баскетбольного мяча.
-cover: ~/assets/projects/fondacija-bogdan-bogdanovic/05-board.jpg
-alt: >-
-  Презентационный лист Fondacija Bogdan Bogdanović: синий флаг с новым логотипом, сравнение
-  старого и нового знака, палитра, шрифт Geist и логотип на мяче, футболке и бейдже
-layout: { row: 3, colStart: 2, colSpan: 5, offset: 0 }
-mobile: { inset: 6, width: 76 }
+cover: ~/assets/projects/fondacija-bogdan-bogdanovic/cover-ball.webp
+alt: Баскетбольный мяч с новым логотипом Fondacija Bogdan Bogdanović — синей буквой B и названием фонда
+layout: { row: 2, colStart: 10, colSpan: 3, offset: 2 }
+mobile: { inset: 10, width: 70 }
 facts:
   - { label: Тип, value: 'Редизайн логотипа, айдентика' }
   - { label: Шрифт, value: 'Geist' }

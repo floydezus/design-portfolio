@@ -9,7 +9,7 @@ cover: ~/assets/projects/svoya-kompaniya/02-cups-in-hand.jpg
 alt: >-
   Рука держит стаканчик «Своя Компания» с паттерном из рисованных десертов,
   рядом второй стакан с голубым держателем в виде банта
-layout: { row: 2, colStart: 7, colSpan: 5, offset: 0 }
+layout: { row: 2, colStart: 1, colSpan: 4, offset: 0 }
 mobile: { inset: 16, width: 72 }
 facts:
   - { label: Проект, value: 'Конкурс бренда «Своя Компания»' }

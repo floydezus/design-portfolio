@@ -1,5 +1,5 @@
 ---
-order: 6
+order: 7
 title: Inktober
 category: Иллюстрация
 kind: extra
@@ -10,7 +10,7 @@ cover: ~/assets/projects/inktober/01-poster.jpg
 alt: >-
   Обложка серии: надпись Inktober 2026 в окружении рисунков — Псидак с покеболом, лохматая
   книга с зубами, крыса в костюме летучей мыши и белая утка с печеньем в клюве
-layout: { row: 3, colStart: 8, colSpan: 4, offset: 8 }
+layout: { row: 3, colStart: 8, colSpan: 3, offset: 6 }
 mobile: { inset: 20, width: 70 }
 facts:
   - { label: Тип, value: 'Личный проект, иллюстрация' }

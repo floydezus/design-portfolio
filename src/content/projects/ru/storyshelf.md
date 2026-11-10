@@ -9,7 +9,7 @@ cover: ~/assets/projects/storyshelf/04-digital.jpg
 alt: >-
   Бренд StoryShelf в цифровой среде: страница приложения в App Store, промо-экран
   и главный экран на iPhone
-layout: { row: 1, colStart: 6, colSpan: 7, offset: 5 }
+layout: { row: 1, colStart: 8, colSpan: 5, offset: 8 }
 mobile: { inset: 0, width: 100 }
 facts:
   - { label: Тип, value: 'Логотип, цветовая система' }
