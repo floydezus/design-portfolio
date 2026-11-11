@@ -37,7 +37,12 @@ const widths = [400, 600, 800, 1000, 1200, 1600];
               />
               <span class="caption">
                 <span id={`${project.slug}-title`} class="title">
-                  ({project.marker}){project.title}
+                  {project.title}
+                  {project.href && (
+                    <svg class="arrow" viewBox="0 0 16 10" aria-hidden="true">
+                      <path d="M0 5h14.5M10.5 1l4 4-4 4" />
+                    </svg>
+                  )}
                 </span>
                 <span id={`${project.slug}-category`} class="category">
                   {project.category}
@@ -75,6 +80,17 @@ const widths = [400, 600, 800, 1000, 1200, 1600];
     font-style: italic;
   }
 
+  .arrow {
+    display: inline-block;
+    width: 0.95em;
+    height: 0.6em;
+    margin-inline-start: 0.3em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.1;
+    vertical-align: 0.05em;
+  }
+
   .category {
     color: var(--text-muted);
   }
@@ -98,6 +114,10 @@ const widths = [400, 600, 800, 1000, 1200, 1600];
       scale: 1.02;
     }
 
+    .work:is(:hover, :focus-visible) .arrow {
+      translate: 0.25em 0;
+    }
+
     .placed-grid:has(.work:is(:hover, :focus-visible)) .work:not(:hover, :focus-visible) {
       opacity: 0.35;
     }
@@ -112,6 +132,23 @@ const widths = [400, 600, 800, 1000, 1200, 1600];
 
       .work :global(img) {
         transition: scale 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+      }
+
+      .arrow {
+        transition: translate 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) 0.1s;
+      }
+    }
+  }
+
+  /* Touch screens have no hover, so the tap itself gets a press response. */
+  @media (hover: none) {
+    .work:active :global(img) {
+      scale: 0.98;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .work :global(img) {
+        transition: scale 0.2s ease;
       }
     }
   }
