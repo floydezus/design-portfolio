@@ -9,7 +9,7 @@ cover: ~/assets/projects/kiki-riki/05-social.jpg
 alt: >-
   Сетка постов kiki riki для соцсетей: Peanut Butter Latte, вафли с арахисовой пастой, стаканы,
   витрина и слоган «More peanut butter, please.»
-layout: { row: 2, colStart: 6, colSpan: 3, offset: 6 }
+layout: { row: 2, colStart: 1, colSpan: 4, offset: 0 }
 mobile: { inset: 14, width: 78 }
 facts:
   - { label: Тип, value: 'Айдентика, упаковка' }

@@ -1,5 +1,5 @@
 ---
-order: 5
+order: 4
 title: Fondacija Bogdan Bogdanović
 category: Редизайн айдентики
 summary: >-
@@ -7,8 +7,8 @@ summary: >-
   оранжевый акцент и носители — от флага до баскетбольного мяча.
 cover: ~/assets/projects/fondacija-bogdan-bogdanovic/cover-ball.webp
 alt: Баскетбольный мяч с новым логотипом Fondacija Bogdan Bogdanović — синей буквой B и названием фонда
-layout: { row: 2, colStart: 10, colSpan: 3, offset: 2 }
-mobile: { inset: 10, width: 70 }
+layout: { row: 2, colStart: 6, colSpan: 3, offset: 6 }
+mobile: { inset: 16, width: 72 }
 facts:
   - { label: Тип, value: 'Редизайн логотипа, айдентика' }
   - { label: Шрифт, value: 'Geist' }

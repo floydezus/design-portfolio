@@ -17,26 +17,33 @@ const widths = [400, 600, 800, 1000, 1200, 1600];
   <ul class="placed-grid">
     {
       projects.map((project, index) => {
-        const picture = (
-          <Picture
-            src={project.cover}
-            alt={project.alt}
-            formats={['avif', 'webp']}
-            widths={widths}
-            sizes={placementSizes(project)}
-            loading={index < EAGER_COUNT ? 'eager' : 'lazy'}
-            fetchpriority={index === 0 ? 'high' : 'auto'}
-            decoding="async"
-          />
-        );
+        const Wrapper = project.href ? 'a' : 'div';
         return (
           <li id={project.slug} class="placed" style={placementStyle(project)}>
-            <figure>
-              {project.href ? <a href={project.href}>{picture}</a> : picture}
-              <figcaption class="sr-only">
-                {project.title}, {project.category.toLowerCase()}
-              </figcaption>
-            </figure>
+            <Wrapper
+              href={project.href}
+              class:list={['work', { extra: project.kind === 'extra' }]}
+              aria-labelledby={project.href && `${project.slug}-title ${project.slug}-category`}
+            >
+              <Picture
+                src={project.cover}
+                alt={project.alt}
+                formats={['avif', 'webp']}
+                widths={widths}
+                sizes={placementSizes(project)}
+                loading={index < EAGER_COUNT ? 'eager' : 'lazy'}
+                fetchpriority={index === 0 ? 'high' : 'auto'}
+                decoding="async"
+              />
+              <span class="caption">
+                <span id={`${project.slug}-title`} class="title">
+                  ({project.marker}){project.title}
+                </span>
+                <span id={`${project.slug}-category`} class="category">
+                  {project.category}
+                </span>
+              </span>
+            </Wrapper>
           </li>
         );
       })
@@ -49,4 +56,63 @@ const widths = [400, 600, 800, 1000, 1200, 1600];
     padding: clamp(1.5rem, 3vw, 3rem) var(--gutter) clamp(1rem, 3vw, 3rem);
   }
 
+  .work,
+  .work:is(:hover, :active) {
+    position: relative;
+    display: block;
+    color: inherit;
+  }
+
+  .caption {
+    display: flex;
+    flex-direction: column;
+    margin-block-start: 0.6em;
+    font-size: var(--fs-small);
+    line-height: 1.3;
+  }
+
+  .extra .title {
+    font-style: italic;
+  }
+
+  .category {
+    color: var(--text-muted);
+  }
+
+  /* Touch screens keep the caption in flow; with a pointer it is revealed on hover or focus. */
+  @media (hover: hover) and (pointer: fine) {
+    .caption {
+      position: absolute;
+      inset-inline: 0;
+      top: 100%;
+      opacity: 0;
+      translate: 0 -0.4em;
+    }
+
+    .work:is(:hover, :focus-visible) .caption {
+      opacity: 1;
+      translate: 0 0;
+    }
+
+    .work:is(:hover, :focus-visible) :global(img) {
+      scale: 1.02;
+    }
+
+    .placed-grid:has(.work:is(:hover, :focus-visible)) .work:not(:hover, :focus-visible) {
+      opacity: 0.35;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .work,
+      .caption {
+        transition:
+          opacity 0.4s ease,
+          translate 0.4s ease;
+      }
+
+      .work :global(img) {
+        transition: scale 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+      }
+    }
+  }
 </style>
