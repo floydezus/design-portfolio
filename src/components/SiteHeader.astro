@@ -16,7 +16,7 @@ const NameTag = isHome ? 'h1' : 'p';
 <header class="site-header">
   <NameTag>
     <a href="/" aria-current={current('/')}>{profile.name}</a>
-    {isHome && <span class="sr-only">{` — ${profile.role.toLowerCase()}, ${profile.location.city}`}</span>}
+    {isHome && <span class="sr-only">{` – ${profile.role.toLowerCase()}, ${profile.location.city}`}</span>}
   </NameTag>
   <nav aria-label={ui.a11y.mainNav}>
     <ul class="nav-list">

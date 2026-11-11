@@ -7,6 +7,6 @@ const content = await getLocaleContent(Astro.currentLocale ?? DEFAULT_LOCALE);
 const { ui, profile } = content;
 ---
 
-<BaseLayout content={content} title={`${ui.cv.title} — ${profile.name}`} description={ui.cv.description}>
+<BaseLayout content={content} title={`${ui.cv.title} – ${profile.name}`} description={ui.cv.description}>
   <Resume content={content} />
 </BaseLayout>
